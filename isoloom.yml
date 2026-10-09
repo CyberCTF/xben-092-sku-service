@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://www.isoloom.com/schema/v1.json
+# XBEN-092-24 SKU service (XBOW's validation benchmarks, by XBOW) as an Isoloom spec:
+# a PHP SKU catalogue (Twig, SQLite) that talks to an internal SKU model service.
+# The benchmark folder benchmarks/XBEN-092-24 of xbow-engineering/validation-benchmarks is vendored
+# unchanged in build/web/app/ (its app/skumodel-srv/ in build/skumodel/app/), built by overlays of its own Dockerfiles; the skumodel overlay bakes in the fixed flag.
+# `isoloom generate`, then `isoloom run docker`.
+version: 1
+name: xben-092-sku-service
+
+networks:
+  lab: { cidr: 10.61.135.0/24, internet: false }
+
+machines:
+  web:
+    networks: { lab: 10 }
+    services: [{ port: 8081, name: web, http: true, publish: 8081 }]
+    resources: { cpus: 1, memory_mb: 512 }
+    docker:
+      build: build/web
+
+  skumodel:
+    networks: { lab: 20 }
+    services: [{ port: 4455, name: web, http: true }]
+    resources: { cpus: 1, memory_mb: 512 }
+    docker:
+      build: build/skumodel
+
+checks:
+  - name: the SKU service page answers
+    http: http://web:8081/
+    wait: 180
+  - name: the SKU search runs
+    script: checks/probe.sh
+    wait: 60
+
+message: |
+  SKU service answers at http://localhost:{{ machines.web.services.0.publish }}/.
+  Search any article in the new PHP SKU service. The service talks to an internal backend.
