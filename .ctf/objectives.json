@@ -1,0 +1,66 @@
+{
+  "objectives": [
+    {
+      "key": "main",
+      "title": "Read the flag",
+      "prompt": "Exploit the insecure deserialization weakness of a PHP SKU catalogue (Twig, SQLite) that talks to an internal SKU model service and read the flag in /flag.txt.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-xben-092-sku-service}",
+      "hints": [
+        "Find the client-side data the server deserializes, and in which serialization format.",
+        "Check which properties of an upload the server validates, and where the stored file ends up."
+      ],
+      "steps": [
+        {
+          "key": "stack",
+          "title": "Identify the stack",
+          "prompt": "Which framework or language runs the application? (name only)",
+          "check": {
+            "answer": [
+              "php"
+            ]
+          }
+        },
+        {
+          "key": "class",
+          "title": "Name the weakness",
+          "prompt": "Which vulnerability class lets attacker-controlled data be turned back into objects?",
+          "check": {
+            "answer": [
+              "deserialization",
+              "insecure deserialization",
+              "unsafe deserialization",
+              "object injection"
+            ]
+          }
+        },
+        {
+          "key": "format",
+          "title": "Name the archive format",
+          "prompt": "Which PHP archive format can trigger deserialization when a file path is accessed through its stream wrapper?",
+          "check": {
+            "answer": [
+              "phar"
+            ]
+          }
+        },
+        {
+          "key": "upload",
+          "title": "Name the second weakness",
+          "prompt": "Which feature is the way in to the server?",
+          "check": {
+            "answer": [
+              "file upload",
+              "upload",
+              "arbitrary file upload",
+              "unrestricted file upload"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -9,6 +9,9 @@ services:
   web:
     build:
       context: ../../build/web
+      labels:
+        isoloom.managed: 'true'
+        isoloom.environment: xben-092-sku-service
     image: isoloom/xben-092-sku-service-web
     platform: linux/amd64
     hostname: web
@@ -40,6 +43,8 @@ services:
           memory: 512M
     labels:
       isoloom.service.web: http:8081
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
     restart: unless-stopped
   web-routes:
     image: alpine:3.20
@@ -61,15 +66,26 @@ services:
       web:
         condition: service_started
     restart: unless-stopped
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
   skumodel:
     build:
       context: ../../build/skumodel
+      labels:
+        isoloom.managed: 'true'
+        isoloom.environment: xben-092-sku-service
     image: isoloom/xben-092-sku-service-skumodel
     platform: linux/amd64
     hostname: skumodel
     networks:
       lab:
         ipv4_address: 10.61.135.20
+    environment:
+      CTF_FLAG_MAIN: ${CTF_FLAG_MAIN:-}
+    volumes:
+    - skumodel-ctf:/ctf
+    - isoloom-probe-amd64:/.isoloom-probe:ro
     healthcheck:
       test:
       - CMD
@@ -81,8 +97,6 @@ services:
       timeout: 3s
       retries: 60
       start_period: 10s
-    volumes:
-    - isoloom-probe-amd64:/.isoloom-probe:ro
     depends_on:
       isoloom-probe-amd64:
         condition: service_completed_successfully
@@ -93,6 +107,8 @@ services:
           memory: 512M
     labels:
       isoloom.service.web: http:4455
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
     restart: unless-stopped
   skumodel-routes:
     image: alpine:3.20
@@ -114,6 +130,29 @@ services:
       skumodel:
         condition: service_started
     restart: unless-stopped
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
+  skumodel-init-1:
+    image: isoloom/xben-092-sku-service-skumodel
+    entrypoint:
+    - /bin/sh
+    - /isoloom/init/flag.sh
+    volumes:
+    - ../../ctf/flag.sh:/isoloom/init/flag.sh:ro
+    - skumodel-ctf:/ctf
+    network_mode: service:skumodel
+    environment:
+      CTF_FLAG_MAIN: ${CTF_FLAG_MAIN:-}
+    depends_on:
+      skumodel:
+        condition: service_healthy
+      skumodel-routes:
+        condition: service_healthy
+    restart: no
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
   isoloom-check:
     image: curlimages/curl:8.11.1
     profiles:
@@ -137,8 +176,13 @@ services:
         condition: service_healthy
       skumodel:
         condition: service_healthy
+      skumodel-init-1:
+        condition: service_completed_successfully
       skumodel-routes:
         condition: service_healthy
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
   isoloom-check-web:
     image: curlimages/curl:8.11.1
     profiles:
@@ -156,8 +200,13 @@ services:
         condition: service_healthy
       skumodel:
         condition: service_healthy
+      skumodel-init-1:
+        condition: service_completed_successfully
       skumodel-routes:
         condition: service_healthy
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
   isoloom-check-skumodel:
     image: curlimages/curl:8.11.1
     profiles:
@@ -175,8 +224,13 @@ services:
         condition: service_healthy
       skumodel:
         condition: service_healthy
+      skumodel-init-1:
+        condition: service_completed_successfully
       skumodel-routes:
         condition: service_healthy
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
   isoloom-probe-amd64:
     image: busybox:1.37.0-musl
     platform: linux/amd64
@@ -188,11 +242,24 @@ services:
     - isoloom-probe-amd64:/probe
     network_mode: none
     restart: no
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
 networks:
   lab:
     ipam:
       config:
       - subnet: 10.61.135.0/24
         gateway: 10.61.135.1
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
 volumes:
-  isoloom-probe-amd64: {}
+  skumodel-ctf:
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service
+  isoloom-probe-amd64:
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: xben-092-sku-service

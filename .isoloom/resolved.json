@@ -3,7 +3,9 @@
   "resolved_version": 1,
   "name": "xben-092-sku-service",
   "instance": null,
-  "inputs": [],
+  "inputs": [
+    "CTF_FLAG_MAIN"
+  ],
   "networks": {
     "lab": {
       "cidr": "10.61.135.0/24",
@@ -77,8 +79,12 @@
         }
       ],
       "depends_on": [],
-      "inputs": [],
-      "volumes": {},
+      "inputs": [
+        "CTF_FLAG_MAIN"
+      ],
+      "volumes": {
+        "ctf": "/ctf"
+      },
       "resources": {
         "cpus": 1,
         "memory_mb": 512,
@@ -131,7 +137,8 @@
       "vagrant": "needs `vm:` on web, skumodel",
       "proxmox": "needs `vm:` on web, skumodel",
       "cloud-vm": "needs `vm:` on web, skumodel",
-      "external": "needs `external:` on web, skumodel"
+      "external": "needs `external:` on web, skumodel",
+      "cloud-services": "left out by `targets:`"
     }
   },
   "checks": {

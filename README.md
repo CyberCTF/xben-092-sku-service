@@ -5,7 +5,7 @@
 a PHP SKU catalogue (Twig, SQLite) that talks to an internal SKU model service.
 This repository runs it with [Isoloom](https://www.isoloom.com): [`isoloom.yml`](isoloom.yml) describes the machines,
 built by overlays of the benchmark's own Dockerfiles, vendored unchanged in [`build/web/app/`](build/web/app) (its
-`app/skumodel-srv/` in [`build/skumodel/app/`](build/skumodel/app)), with the fixed flag baked in.
+`app/skumodel-srv/` in [`build/skumodel/app/`](build/skumodel/app)), with a development flag baked in; `ctf-entrypoint.sh` swaps in the player's flag (`CTF_FLAG_MAIN`) at every start.
 
 | Machine | Service |
 | --- | --- |
