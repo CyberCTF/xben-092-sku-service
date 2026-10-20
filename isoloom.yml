@@ -8,28 +8,38 @@ version: 1
 name: xben-092-sku-service
 
 # Given by the CyberCTF launcher: this player's flag. Without it the development flag.
-inputs: [CTF_FLAG_MAIN]
+inputs:
+  CTF_FLAG_MAIN: {}
 
 networks:
-  lab: { cidr: 10.61.135.0/24, internet: false }
+  lab: {cidr: 10.61.135.0/24, internet: false}
 
 machines:
   web:
-    networks: { lab: 10 }
-    services: [{ port: 8081, name: web, http: true, publish: 8081 }]
-    resources: { cpus: 1, memory_mb: 512 }
-    docker:
+    networks: {lab: 10}
+    resources: {cpus: 1, memory_mb: 512}
+    ports:
+      web:
+        port: 8081
+        protocol: http
+        publish: true
+    app:
       build: build/web
-
   skumodel:
-    networks: { lab: 20 }
-    services: [{ port: 4455, name: web, http: true }]
-    resources: { cpus: 1, memory_mb: 512 }
-    inputs: [CTF_FLAG_MAIN]
-    volumes: { ctf: /ctf }   # the flag, written by ctf/flag.sh at every start
-    docker:
+    networks: {lab: 20}
+    resources: {cpus: 1, memory_mb: 512}
+    volumes: {ctf: /ctf}     # the flag, written by ctf/flag.sh at every start
+    ports:
+      web:
+        port: 4455
+        protocol: http
+    files:
+      - path: /run/lab/ctf_flag_main
+        input: CTF_FLAG_MAIN
+    setup:
+      - ctf/flag.sh
+    app:
       build: build/skumodel
-      init: [ctf/flag.sh]
 
 checks:
   - name: the SKU service page answers
@@ -40,5 +50,5 @@ checks:
     wait: 60
 
 message: |
-  SKU service answers at http://localhost:{{ machines.web.services.0.publish }}/.
+  SKU service answers at {{ machines.web.ports.web.url }}.
   Search any article in the new PHP SKU service. The service talks to an internal backend.
